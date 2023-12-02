@@ -23,30 +23,13 @@ jobs:
           python-version: "3.10"
       - name: Install Poetry Action
         uses: snok/install-poetry@v1.3.4
-      - name: Install dependencies
-        run: poetry install --no-root
+      - name: Lint Task
+        run: poetry run task lint
+      - name: Formatter
+        run: poetry run task formatter
+      - name: Secuirty
+        run: poetry run task security
 
-  static-code-analysis:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./example-app
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      - name: Run linter (flake8)
-        run: |
-          poetry run task lint
-      - name: Run code formatter
-        run: |
-          poetry run task formatter
-      - name: Run security check
-        run: |
-          poetry run task security
-      
   unit-tests:
     runs-on: ubuntu-latest
     defaults:
