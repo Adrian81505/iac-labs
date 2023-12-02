@@ -32,9 +32,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Install dependencies
+      - name: Install project dependencies
         run: |
-          source $HOME/.poetry/env
+          cd ./example-app
           poetry install --no-root
 
   lint:
