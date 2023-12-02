@@ -45,7 +45,7 @@ jobs:
       - name: Run linter
         run: poetry run task lint
 
-  format:
+  formatting:
     runs-on: ubuntu-latest
     needs: install-dependencies
     defaults:
@@ -63,8 +63,21 @@ jobs:
     defaults:
       run:
         working-directory: ./example-app
+    strategy:
+      matrix:
+        cache-key: [security-cache]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/work/<path>/example-app/.venv
+          key: ${{ matrix.cache-key }}
       - name: Run security check
         run: poetry run task security
+      - name: Save cache
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/work/<path>/example-app/.venv
+          key: ${{ matrix.cache-key }}
