@@ -10,11 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  install-dependencies:
+  install-poetry:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./example-app
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
@@ -22,41 +19,52 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install Poetry Action
-        run: |
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-          source $HOME/.poetry/env
+        uses: snok/install-poetry@v1.3.4
+
+  install-dependencies:
+    runs-on: ubuntu-latest
+    needs: install-poetry
+    defaults:
+      run:
+        working-directory: ./example-app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Install dependencies
         run: poetry install --no-root
 
-  static-code-analysis:
+  lint:
     runs-on: ubuntu-latest
+    needs: install-dependencies
     defaults:
       run:
         working-directory: ./example-app
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      - name: Install Poetry Action
-        run: |
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-          source $HOME/.poetry/env
-      - name: Run linter, formatter, security checks
-        run: |
-          poetry run task lint
-          poetry run task formatter
-          poetry run task security
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run linter
+        run: poetry run task lint
 
-  unit-tests:
+  format:
     runs-on: ubuntu-latest
+    needs: install-dependencies
     defaults:
       run:
         working-directory: ./example-app
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run code formatter
+        run: poetry run task formatter
+
+  security:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    defaults:
+      run:
+        working-directory: ./example-app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run security check
+        run: poetry run task security
