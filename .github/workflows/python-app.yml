@@ -38,7 +38,7 @@ jobs:
         run: cd ./example-app         # Przechodzi do katalogu
       - name: Install project dependencies
         run: |
-          poetry install --no-root
+          ~/.local/bin/poetry install --no-root
 
   lint:
     runs-on: ubuntu-latest
@@ -51,8 +51,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Run linter
         run: |
-          source $HOME/.poetry/env
-          poetry run task lint
+          ~/.local/bin/poetry run task lint
 
   formatting:
     runs-on: ubuntu-latest
@@ -65,8 +64,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Run code formatter
         run: |
-          source $HOME/.poetry/env
-          poetry run task formatter
+          ~/.local/bin/poetry run task formatter
 
   security:
     runs-on: ubuntu-latest
@@ -87,8 +85,7 @@ jobs:
           key: ${{ matrix.cache-key }}
       - name: Run security check
         run: |
-          source $HOME/.poetry/env
-          poetry run task security
+          ~/.local/bin/poetry run task security
       - name: Save cache
         uses: actions/cache@v2
         with:
