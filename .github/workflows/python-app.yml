@@ -32,9 +32,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Create directory if not exists
+        run: mkdir -p ./example-app  # Tworzy katalog, jeśli go nie ma
+      - name: Move to the directory
+        run: cd ./example-app         # Przechodzi do katalogu
       - name: Install project dependencies
         run: |
-          cd ./example-app
           poetry install --no-root
 
   lint:
