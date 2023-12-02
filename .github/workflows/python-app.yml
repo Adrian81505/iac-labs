@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  install-dependencies:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,9 +25,32 @@ jobs:
         uses: snok/install-poetry@v1.3.4
       - name: Install dependencies
         run: poetry install --no-root
-      - name: Run lint task
-        run: poetry run task lint || true
-      - name: Run formatter task
-        run: poetry run task formatter || true
-      - name: Run security task
-        run: poetry run task security || true
+
+  static-code-analysis:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./example-app
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Run linter, formatter, security checks
+        run: |
+          poetry run task lint
+          poetry run task formatter
+          poetry run task security
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./example-app
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
