@@ -1,4 +1,4 @@
-name: Aplikacja Pythona
+name: Apka Pythona
 
 on:
   push:
@@ -10,8 +10,36 @@ permissions:
   contents: read
 
 jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows i Ubuntu
+    steps:
+      - uses: actions/checkout@v3
+      - name: Skonfiguruj Pythona 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Zainstaluj akcję Poetry
+        uses: snok/install-poetry@v1.3.4
+      - name: Załaduj zbuforowane venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pypoetry
+            .venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Zbuduj aplikację
+        run: poetry build
+        working-directory: ./example-app
+
   install-dependencies:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows i Ubuntu
     defaults:
       run:
         working-directory: ./example-app
@@ -40,7 +68,10 @@ jobs:
         poetry install --no-root
 
   lint: 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows i Ubuntu
     needs: install-dependencies
     defaults:
       run:
@@ -65,7 +96,10 @@ jobs:
       run: poetry run task lint
 
   code-formatting:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows i Ubuntu
     needs: install-dependencies
     defaults:
       run:
@@ -89,9 +123,11 @@ jobs:
     - name: Run code formatter
       run: poetry run task formatter
 
-
   security-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows i Ubuntu
     needs: install-dependencies
     defaults:
       run:
@@ -115,17 +151,17 @@ jobs:
     - name: Run security tests
       run: poetry run task security
 
-
   unit-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows i Ubuntu
     needs:
       - lint
       - security-tests
       - code-formatting
       - install-dependencies
+      - build # Dodany build jako wymaganie
     defaults:
       run:
         working-directory: ./example-app
