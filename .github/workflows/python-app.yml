@@ -141,3 +141,4 @@ jobs:
         key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
     - name: Run unit tests
       run: poetry run pytest
+
