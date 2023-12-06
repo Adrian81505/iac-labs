@@ -1,4 +1,4 @@
-name: Python application
+name: Aplikacja Pythona
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: |
         poetry install --no-root
-      
+
   lint: 
     runs-on: ubuntu-latest
     needs: install-dependencies
@@ -89,6 +89,7 @@ jobs:
     - name: Run code formatter
       run: poetry run task formatter
 
+
   security-tests:
     runs-on: ubuntu-latest
     needs: install-dependencies
@@ -114,31 +115,35 @@ jobs:
     - name: Run security tests
       run: poetry run task security
 
+
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ] # Dodane testy na Windows
     needs:
       - lint
       - security-tests
       - code-formatting
+      - install-dependencies
     defaults:
       run:
         working-directory: ./example-app
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install Poetry Action
-      uses: snok/install-poetry@v1.3.4
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cache/pypoetry
-          .venv
-        key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-    - name: Run unit tests
-      run: poetry run pytest
-
+      - uses: actions/checkout@v3
+      - name: Skonfiguruj Pythona 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Zainstaluj akcję Poetry
+        uses: snok/install-poetry@v1.3.4
+      - name: Załaduj zbuforowane venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pypoetry
+            .venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Uruchom testy jednostkowe
+        run: poetry run pytest
